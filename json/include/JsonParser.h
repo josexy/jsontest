@@ -1,5 +1,5 @@
-#ifndef HELLOWORLD_JSONPARSER_H
-#define HELLOWORLD_JSONPARSER_H
+#ifndef JSONTEST_JSONPARSER_H
+#define JSONTEST_JSONPARSER_H
 
 #include "JsonObject.h"
 #include "JsonReader.h"
@@ -7,102 +7,104 @@
 #include <codecvt>
 #include <cmath>
 
-class JsonConvert;
+namespace Json {
 
-class JsonParser {
-public:
+    class JsonConvert;
 
-    friend class JsonConvert;
+    class JsonParser {
+    public:
 
-    JsonParser() = delete;
+        friend class JsonConvert;
 
-    explicit JsonParser(const std::string &jsonText) : __reader(jsonText) {}
+        JsonParser() = delete;
 
-    explicit JsonParser(const JsonReader &jsonReader) : __reader(jsonReader) {}
+        explicit JsonParser(const std::string &jsonText) : __reader(jsonText) {}
 
-    explicit JsonParser(std::ifstream &ifs) : __reader(ifs) {}
+        explicit JsonParser(const JsonReader &jsonReader) : __reader(jsonReader) {}
 
-    explicit JsonParser(FILE *fp) : __reader(fp) {}
+        explicit JsonParser(std::ifstream &ifs) : __reader(ifs) {}
 
-    void parseJson();
+        explicit JsonParser(FILE *fp) : __reader(fp) {}
 
-    static std::string __num2str(double d) {
-        if (std::isinf(d))return "0";
-        std::stringstream oss;
-        oss << std::fixed << d;
-        std::string s;
-        oss >> s;
-        return s;
-    }
+        void parseJsonDocument();
 
-    static double __str2num(const std::string &s) {
-        std::stringstream ss;
-        ss << s;
-        double d;
-        ss >> d;
-        return d;
-    }
+        static std::string __num2str(double d) {
+            if (std::isinf(d))return "0";
+            std::stringstream oss;
+            oss << std::fixed << d;
+            std::string s;
+            oss >> s;
+            return s;
+        }
 
-    static bool is_normal_char(char sn) { return (sn == '{' || sn == '}' || sn == '[' || sn == ']' || sn == ':'); }
+        static double __str2num(const std::string &s) {
+            std::stringstream ss;
+            ss << s;
+            double d;
+            ss >> d;
+            return d;
+        }
 
-    static bool is_space_char(char sn) { return (sn == ' ' || sn == '\r' || sn == '\n' || sn == '\t'); }
+        static bool is_normal_char(char sn) { return (sn == '{' || sn == '}' || sn == '[' || sn == ']' || sn == ':'); }
 
-    static bool is_hex(char sn) { return sn >= '0' && (sn <= 'f' || sn <= 'F'); }
+        static bool is_space_char(char sn) { return (sn == ' ' || sn == '\r' || sn == '\n' || sn == '\t'); }
 
-    static bool is_oct(char sn) { return sn >= '0' && sn <= '7'; }
+        static bool is_hex(char sn) { return sn >= '0' && (sn <= 'f' || sn <= 'F'); }
 
-    static bool is_number(char sn) { return sn >= '0' && sn <= '9'; }
+        static bool is_oct(char sn) { return sn >= '0' && sn <= '7'; }
 
-    static bool is_escape(char sn) {
-        return (sn == 'a' || sn == 'b' || sn == 'f' || sn == 'r' || sn == 't' ||
-                sn == 'v' || sn == '\'' || sn == '\"' || sn == '\?' ||
-                sn == '\\' || sn == '0' || sn == 'n');
-    }
+        static bool is_number(char sn) { return sn >= '0' && sn <= '9'; }
 
-    static bool is_error_char(const std::string &s, char sn) {
-        if (s == ":") return (sn == '}' || sn == ']' || sn == ',' || sn == ':');
-        if (s == "{")return (sn == '{' || sn == '[' || sn == ',' || sn == ':');
-        if (s == "[")return (sn == '}' || sn == ',' || sn == ':');
-        return false;
-    }
+        static bool is_escape(char sn) {
+            return (sn == 'a' || sn == 'b' || sn == 'f' || sn == 'r' || sn == 't' ||
+                    sn == 'v' || sn == '\'' || sn == '\"' || sn == '\?' ||
+                    sn == '\\' || sn == '0' || sn == 'n');
+        }
 
-protected:
-    std::string parseNull(char prev);
+        static bool is_error_char(const std::string &s, char sn) {
+            if (s == ":") return (sn == '}' || sn == ']' || sn == ',' || sn == ':');
+            if (s == "{") return (sn == '{' || sn == '[' || sn == ',' || sn == ':');
+            if (s == "[") return (sn == '}' || sn == ',' || sn == ':');
+            return false;
+        }
 
-    std::string parseBoolean(char prev);
+    protected:
+        std::string parseNull(char prev);
 
-    std::string parseNumber(char prev);
+        std::string parseBoolean(char prev);
 
-    std::string parseString(char prev);
+        std::string parseNumber(char prev);
 
-    std::string resolve_escape_hex_unicode();
+        std::string parseString(char prev);
 
-    std::string resolve_escape_number(char sn);
+        std::string resolve_escape_hex_unicode();
 
-    char convert2escape(char sn);
+        std::string resolve_escape_number(char sn);
 
-private:
-    void buffer_reset() { __buffer_value.clear(); }
+        char convert2escape(char sn);
 
-    void buffer_append(const char *value) { __buffer_value.append(value); }
+    private:
+        void buffer_reset() { __buffer_value.clear(); }
 
-    void buffer_insert(char c, int pos = 0) { __buffer_value.insert(pos, 1, c); }
+        void buffer_append(const char *value) { __buffer_value.append(value); }
 
-    char buffer_back() const { return !__buffer_value.empty() ? __buffer_value.back() : '\0'; }
+        void buffer_insert(char c, int pos = 0) { __buffer_value.insert(pos, 1, c); }
 
-    char buffer_index(int index = 0) const { return __buffer_value.at(index); }
+        char buffer_back() const { return !__buffer_value.empty() ? __buffer_value.back() : '\0'; }
 
-    void buffer_append(char value) { __buffer_value.append(1, value); }
+        char buffer_index(int index = 0) const { return __buffer_value.at(index); }
 
-    int buffer_size() const { return __buffer_value.size(); }
+        void buffer_append(char value) { __buffer_value.append(1, value); }
 
-    const char *buffer_str() const { return __buffer_value.c_str(); }
+        int buffer_size() const { return __buffer_value.size(); }
 
-private:
-    std::string __buffer_value;
-    std::vector<std::string> jsonValue;
-    JsonReader __reader;
-    mutable bool __escape = false, __parser = false;
-};
+        const char *buffer_str() const { return __buffer_value.c_str(); }
 
-#endif //HELLOWORLD_JSONPARSER_H
+    private:
+        std::string __buffer_value;
+        std::vector<std::string> jsonValue;
+        JsonReader __reader;
+        mutable bool __escape = false, __parser = false;
+    };
+}
+#endif

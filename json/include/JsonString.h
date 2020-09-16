@@ -1,89 +1,90 @@
-#ifndef HELLOWORLD_JSONSTRING_H
-#define HELLOWORLD_JSONSTRING_H
+#ifndef JSONTEST_JSONSTRING_H
+#define JSONTEST_JSONSTRING_H
 
 #include "JsonValue.h"
 
-class JsonString : public JsonValue {
-public:
-    explicit JsonString(const std::string &s) : __str(s), __escape(true) {}
+namespace Json {
+    class JsonString : public JsonValue {
+    public:
+        explicit JsonString(const std::string &s) : __str(s), __escape(true) {}
 
-    void setEscapeChar(bool escape) override { __escape = escape; }
+        void setEscapeChar(bool escape) override { __escape = escape; }
 
-    Data data() const override { return Data{__str}; }
+        Data data() const override { return Data{__str}; }
 
-    JsonValueType type() const override { return JsonValueType::String; }
+        JsonValueType type() const override { return JsonValueType::String; }
 
-    void setData(const Data &data) override { __str = data.data1; }
+        void setData(const Data &data) override { __str = data.data1; }
 
-    std::string toString() override {
-        if (__escape) {
-            return "\"" + __str + "\"";
-        } else {
-            std::string s = "\"";
-            for (int i = 0; i < __str.size(); i++) {
-                char c = __str[i];
-                std::string tp;
-                if (is_escape(c, tp))
-                    s += tp;
-                else
-                    s += c;
+        std::string toString() override {
+            if (__escape) {
+                return "\"" + __str + "\"";
+            } else {
+                std::string s = "\"";
+                for (int i = 0; i < __str.size(); i++) {
+                    char c = __str[i];
+                    std::string tp;
+                    if (is_escape(c, tp))
+                        s += tp;
+                    else
+                        s += c;
+                }
+                s += "\"";
+                return s;
             }
-            s += "\"";
-            return s;
         }
-    }
 
-    static bool is_escape(char c, std::string &s) {
-        bool flag = true;
-        switch (c) {
-            case '\a':
-                s = "\\a";
-                break;
-            case '\b':
-                s = "\\b";
-                break;
-            case '\f':
-                s = "\\f";
-                break;
-            case '\t':
-                s = "\\t";
-                break;
-            case '\n':
-                s = "\\n";
-                break;
-            case '\r':
-                s = "\\r";
-                break;
-            case '\v':
-                s = "\\v";
-                break;
-            case '\\':
-                s = "\\\\";
-                break;
-            case '\'':
-                s = "\\\'";
-                break;
-            case '\"':
-                s = "\\\"";
-                break;
-            case '\0':
-                s = "\\0";
-                break;
-            case '\?':
-                s = "\\?";
-                break;
-            default:
-                flag = false;
-                break;
+        static bool is_escape(char c, std::string &s) {
+            bool flag = true;
+            switch (c) {
+                case '\a':
+                    s = "\\a";
+                    break;
+                case '\b':
+                    s = "\\b";
+                    break;
+                case '\f':
+                    s = "\\f";
+                    break;
+                case '\t':
+                    s = "\\t";
+                    break;
+                case '\n':
+                    s = "\\n";
+                    break;
+                case '\r':
+                    s = "\\r";
+                    break;
+                case '\v':
+                    s = "\\v";
+                    break;
+                case '\\':
+                    s = "\\\\";
+                    break;
+                case '\'':
+                    s = "\\\'";
+                    break;
+                case '\"':
+                    s = "\\\"";
+                    break;
+                case '\0':
+                    s = "\\0";
+                    break;
+                case '\?':
+                    s = "\\?";
+                    break;
+                default:
+                    flag = false;
+                    break;
+            }
+            return flag;
         }
-        return flag;
-    }
 
-protected:
-    using JsonValue::toList;
-private:
-    std::string __str;
-    bool __escape;
-};
-
-#endif //HELLOWORLD_JSONSTRING_H
+    protected:
+        using JsonValue::toList;
+    private:
+        std::string __str;
+        bool __escape;
+    };
+}
+#endif

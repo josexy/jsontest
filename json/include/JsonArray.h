@@ -1,5 +1,5 @@
-#ifndef HELLOWORLD_JSONARRAY_H
-#define HELLOWORLD_JSONARRAY_H
+#ifndef JSONTEST_JSONARRAY_H
+#define JSONTEST_JSONARRAY_H
 
 #include "JsonBoolean.h"
 #include "JsonNull.h"
@@ -9,63 +9,74 @@
 #include <vector>
 #include <memory>
 
-class JsonArray : public JsonValue, private JsonFormatter {
-public:
-    typedef std::vector<std::shared_ptr<JsonValue>> json_array_vector_pair_t;
-    typedef json_array_vector_pair_t::const_iterator json_array_citerator;
-    typedef json_array_vector_pair_t::iterator json_array_iterator;
-    typedef json_array_vector_pair_t::value_type json_array_element_t;
-public:
-    explicit JsonArray(bool format = false, int indent = 4, bool escape = true)
-            : JsonFormatter(indent), __format(format), __indent(indent), __escape(escape) {}
+namespace Json {
+    class JsonArray : public JsonValue, private JsonFormatter {
+    public:
+        typedef std::vector<std::shared_ptr<JsonValue>> json_array_vector_pair_t;
+        typedef json_array_vector_pair_t::const_iterator json_array_citerator;
+        typedef json_array_vector_pair_t::iterator json_array_iterator;
+        typedef json_array_vector_pair_t::value_type json_array_element_t;
+    public:
+        explicit JsonArray(bool format = false, int indent = 4, bool escape = true)
+                : JsonFormatter(indent), __format(format), __escape(escape) {}
 
-    bool put(JsonValue *jsonValue);
 
-    bool put(const std::shared_ptr<JsonValue> &jsonValue);
+        bool put(JsonValue *jsonValue);
 
-    bool put(std::string &&value) { return put(new JsonString(value)); }
+        bool put(const std::shared_ptr<JsonValue> &jsonValue);
 
-    bool put(int value) { return put(new JsonNumber(value)); }
+        bool put(std::string &&value) { return put(new JsonString(value)); }
 
-    bool put(double value) { return put(new JsonNumber(value)); }
+        bool put(int value) { return put(new JsonNumber(value)); }
 
-    bool put(bool value) { return put(new JsonBoolean(value)); }
+        bool put(double value) { return put(new JsonNumber(value)); }
 
-    bool put() { return put(new JsonNull()); }
+        bool put(bool value) { return put(new JsonBoolean(value)); }
 
-    const json_array_element_t &get(int index);
+        bool put() { return put(new JsonNull()); }
 
-    json_array_citerator find(JsonValue *jsonValue);
+        const json_array_element_t &get(int index);
 
-    JsonValueType type() const override { return JsonValueType::Array; }
+        json_array_citerator find(JsonValue *jsonValue);
 
-    std::string toString() override;
+        // current JsonArray object type
+        JsonValueType type() const override { return JsonValueType::Array; }
 
-    Data data(int index) { return get(index)->data(); }
+        std::string toString() override;
 
-    JsonValue *value(int index) { return get(index).get(); }
+        Data data(int index) { return get(index)->data(); }
 
-    JsonValue *value(const std::string &) override { return nullptr; }
+        /**
+         * get value from JsonArray by order index
+         * @param index
+         * @return JsonValue*
+         */
+        JsonValue *value(int index) { return get(index).get(); }
 
-    int size() const { return __lstJsonArray.size(); }
+        JsonValue *value(const std::string &) override { return nullptr; }
 
-    json_array_iterator begin() { return __lstJsonArray.begin(); }
+        /**
+         * the size of JsonArray including value object
+         * @return
+         */
+        int size() const { return __lstJsonArray.size(); }
 
-    json_array_iterator end() { return __lstJsonArray.end(); }
+        json_array_iterator begin() { return __lstJsonArray.begin(); }
 
-protected:
-    using JsonValue::data;
-    using JsonValue::setData;
+        json_array_iterator end() { return __lstJsonArray.end(); }
 
-    void __toList();
+    protected:
+        using JsonValue::data;
+        using JsonValue::setData;
 
-    const std::vector<std::string> &toList() override;
+        void __toList();
 
-private:
-    bool __format, __escape;
-    int __indent;
-    json_array_vector_pair_t __lstJsonArray;
-    std::vector<std::string> __lstJsonText;
-};
+        const std::vector<std::string> &toList() override;
 
-#endif //HELLOWORLD_JSONARRAY_H
+    private:
+        bool __format, __escape;
+        json_array_vector_pair_t __lstJsonArray;
+        std::vector<std::string> __lstJsonText;
+    };
+}
+#endif

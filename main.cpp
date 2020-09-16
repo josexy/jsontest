@@ -1,6 +1,8 @@
+
 #include <iostream>
 #include "json/include/Json.h"
 
+using namespace Json;
 using namespace std;
 
 int json_write() {
@@ -32,14 +34,26 @@ int json_write() {
 int json_read() {
     string jsonText = R""({"menu":{"id":"file","value":null,"popup":{"menuitem":[{"value":"New","onclick":"CreateNewDoc()"},{"value":"Open","onclick":"OpenDoc()"},{"value":"Close","onclick":"CloseDoc()"}]}}})"";
     ifstream ifs;
-    ifs.open("test.json");
+    ifs.open("test_array.json");
+//    ifs.open("test_object.json");
+    if(!ifs.is_open()) {
+        cout<<"Not open\n";
+        return -1;
+    }
     try {
-        JsonConvert jsonConvert(jsonText, true);
-        JsonObject *object = dynamic_cast<JsonObject *>(jsonConvert.convertJson());
+        JsonConvert jsonConvert(ifs,true);
+        JsonValue *value=jsonConvert.convertJson();
+
+        JsonArray *array = nullptr;
+        JsonObject *object = nullptr;
+
+        if(value->type()==JsonValueType::Array)
+            array=dynamic_cast<JsonArray *>(value);
+        else if(value->type()==JsonValueType::Object)
+            object=dynamic_cast<JsonObject *>(value);
+
         if (object) {
-            JsonArray *array = (JsonArray*)object->value("menu")->value("popup")->value("menuitem");
-            cout << object << endl;
-            cout << array << endl;
+            array=(JsonArray*)object->value("menu")->value("popup")->value("menuitem");
             for (auto &x:*array) {
                 if (x->type() == JsonValueType::Object) {
                     JsonObject *obj = (JsonObject *) x.get();
@@ -47,6 +61,11 @@ int json_read() {
                         cout << y.key << " => " << y.value << endl;
                     }
                 }
+            }
+        }else if(array){
+            cout<<array<<endl;
+            for (auto x=array->begin();x!=array->end();x++){
+                cout<<x->get()->value("email")->data().data1<<endl;
             }
         }
     } catch (JsonException &jsonException) {

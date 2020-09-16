@@ -2,24 +2,25 @@
 #include "../include/JsonParser.h"
 #include "../include/JsonException.h"
 
-std::string JsonParser::parseNull(char prev) {
+// parser null object value
+std::string Json::JsonParser::parseNull(char prev) {
     buffer_reset();
     for (;;) {
         if (prev + __reader.substr(3) == "null") {
             buffer_append("null");
             __reader.moveTo(3);
         }
-        char c = __reader.get();
+        char c = __reader.peek();
         if (c == JSON_SEPARATE || c == JSON_OBJECT_END || c == JSON_ARRAY_END) {
-            __reader.back();
             break;
-        } else if (is_space_char(c))continue;
+        } else if (is_space_char(__reader.get()))continue;
         else throw JsonException(__reader);
     }
     return buffer_str();
 }
 
-std::string JsonParser::parseBoolean(char prev) {
+// parser boolean[true/false] value
+std::string Json::JsonParser::parseBoolean(char prev) {
     buffer_reset();
     for (;;) {
         if (prev + __reader.substr(3) == "true") {
@@ -29,17 +30,17 @@ std::string JsonParser::parseBoolean(char prev) {
             buffer_append("false");
             __reader.moveTo(4);
         }
-        char c = __reader.get();
+        char c = __reader.peek();
         if (c == JSON_SEPARATE || c == JSON_OBJECT_END || c == JSON_ARRAY_END) { // true,  true}  true]
-            __reader.back();
             break;
-        } else if (is_space_char(c)) continue;    // true   , true  }  true  ]
+        } else if (is_space_char(__reader.get())) continue;    // true   , true  }  true  ]
         else throw JsonException(__reader);
     }
     return buffer_str();
 }
 
-std::string JsonParser::parseNumber(char prev) {
+// parser number value
+std::string Json::JsonParser::parseNumber(char prev) {
     buffer_reset();
     bool __unique = false, __negative = false;
     // -.1234 => -0.1234, .1234 => 0.1234
@@ -108,7 +109,8 @@ std::string JsonParser::parseNumber(char prev) {
     return __num2str(strtod((buffer_str()), nullptr));
 }
 
-std::string JsonParser::parseString(char prev) {
+// parser string["..."] value
+std::string Json::JsonParser::parseString(char prev) {
     buffer_reset();
     buffer_append(prev);
     for (;;) {
@@ -121,12 +123,13 @@ std::string JsonParser::parseString(char prev) {
             }
             char sn = __reader.get();
             if (is_escape(sn)) {
-                sn = convert2escape(sn);
-                buffer_append(sn);
+                buffer_append(convert2escape(sn));
+                // parse hex string
             } else if (sn == 'x' || is_number(sn)) {
                 std::string hex_oct = resolve_escape_number(sn);
                 if (hex_oct.empty()) throw JsonException(__reader);
                 buffer_append(hex_oct.c_str());
+                // parse unicode string
             } else if (sn == 'u') {
                 std::string unicodeS = resolve_escape_hex_unicode();
                 if (unicodeS.empty()) throw JsonException(__reader);
@@ -135,11 +138,10 @@ std::string JsonParser::parseString(char prev) {
         } else if (s == '\"') {
             buffer_append('\"');
             for (;;) {
-                char nextC = __reader.get();
-                if (nextC == JSON_SEPARATE || JsonParser::is_normal_char(nextC)) {
-                    __reader.back();
+                char c = __reader.peek();
+                if (c == JSON_SEPARATE || JsonParser::is_normal_char(c)) {
                     break;
-                } else if (is_space_char(nextC))continue;
+                } else if (is_space_char(__reader.get()))continue;
                 else throw JsonException(__reader);
             }
             break;
@@ -148,13 +150,14 @@ std::string JsonParser::parseString(char prev) {
     return buffer_str();
 }
 
-void JsonParser::parseJson() {
+void Json::JsonParser::parseJsonDocument() {
     while (!__reader.eof()) {
         char s = __reader.get();
         if (is_space_char(s)) continue;
         if (s == JSON_SEPARATE) {
-            if (is_error_char(!jsonValue.empty() ? jsonValue.back() : "\0", s))throw JsonException(__reader);
-            continue;
+            if (__reader.peek() == JSON_SEPARATE) __reader.moveTo(1), throw JsonException(__reader);
+            else if (is_error_char(!jsonValue.empty() ? jsonValue.back() : "\0", s)) throw JsonException(__reader);
+            else continue;
         }
         if (s == '\"') {
             jsonValue.push_back(parseString(s));
@@ -175,40 +178,7 @@ void JsonParser::parseJson() {
     __parser = true;
 }
 
-std::string JsonParser::resolve_escape_hex_unicode() {
-    buffer_reset();
-    for (int i = 0; i < 4; i++) {
-        char c = __reader.get();
-        if (!is_hex(c)) return "";
-        buffer_append(c);
-    }
-    std::stringstream ss;
-    int unicodeC;
-    ss << std::hex << buffer_str();
-    ss >> unicodeC;
-    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
-    return convert.to_bytes(unicodeC);
-}
-
-std::string JsonParser::resolve_escape_number(char sn) {
-    bool flag_hex_oct = false;
-    buffer_reset();
-    if (sn == 'x')
-        flag_hex_oct = true;
-    else
-        buffer_append(sn);
-    int base = flag_hex_oct ? 16 : 8;
-    if (base == 8 && !is_oct(sn))return "";
-    for (int i = 0; i < 2; ++i) {
-        sn = __reader.get();
-        if (base == 16 && is_hex(sn))buffer_append(sn);
-        else if (base == 8 && is_oct(sn)) buffer_append(sn);
-        else return "";
-    }
-    return std::to_string(strtol(buffer_str(), nullptr, base));
-}
-
-char JsonParser::convert2escape(char sn) {
+char Json::JsonParser::convert2escape(char sn) {
     char c;
     switch (sn) {
         case 'a':
@@ -252,4 +222,37 @@ char JsonParser::convert2escape(char sn) {
             break;
     }
     return c;
+}
+
+std::string Json::JsonParser::resolve_escape_hex_unicode() {
+    buffer_reset();
+    for (int i = 0; i < 4; i++) {
+        char c = __reader.get();
+        if (!is_hex(c)) return "";
+        buffer_append(c);
+    }
+    std::stringstream ss;
+    int unicodeC;
+    ss << std::hex << buffer_str();
+    ss >> unicodeC;
+    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
+    return convert.to_bytes(unicodeC);
+}
+
+std::string Json::JsonParser::resolve_escape_number(char sn) {
+    bool flag_hex_oct = false;
+    buffer_reset();
+    if (sn == 'x')
+        flag_hex_oct = true;
+    else
+        buffer_append(sn);
+    int base = flag_hex_oct ? 16 : 8;
+    if (base == 8 && !is_oct(sn))return "";
+    for (int i = 0; i < 2; ++i) {
+        sn = __reader.get();
+        if (base == 16 && is_hex(sn))buffer_append(sn);
+        else if (base == 8 && is_oct(sn)) buffer_append(sn);
+        else return "";
+    }
+    return std::to_string(strtol(buffer_str(), nullptr, base));
 }

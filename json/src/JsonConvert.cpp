@@ -2,7 +2,7 @@
 #include "../include/JsonConvert.h"
 #include "../include/JsonException.h"
 
-void JsonConvert::convertObject(JsonObject *jsonObject, const std::string &value) {
+void Json::JsonConvert::convertObject(JsonObject *jsonObject, const std::string &value){
     if (value[0] == JSON_OBJECT_BEGIN) {
         while (__ptr < __len) {
             std::string v = __lstJsonValue[__ptr];
@@ -43,11 +43,11 @@ void JsonConvert::convertObject(JsonObject *jsonObject, const std::string &value
     }
 }
 
-void JsonConvert::convertArray(JsonArray *jsonArray, const std::string &value) {
+void Json::JsonConvert::convertArray(JsonArray *jsonArray, const std::string &value) {
     if (value[0] == JSON_ARRAY_BEGIN) {
         while (__ptr < __len) {
             std::string v = __lstJsonValue[__ptr++];
-            if (v[0] == JSON_ARRAY_END) break;
+            if (v[0] == JSON_ARRAY_END) {break;}
             if (v[0] == '\"') {
                 __remove_quotation(v);
                 jsonArray->put(std::string(v));
@@ -70,13 +70,13 @@ void JsonConvert::convertArray(JsonArray *jsonArray, const std::string &value) {
     }
 }
 
-JsonValue *JsonConvert::convertJson() {
+Json::JsonValue *Json::JsonConvert::convertJson() {
+    if(jsonValue) return jsonValue;
     if (__lstJsonValue.empty()) return nullptr;
     auto beginIter = __lstJsonValue.begin();
     auto endIter = __lstJsonValue.end();
 
     std::string v = __lstJsonValue[0];
-    JsonValue *jsonValue;
     if (v == _JSCS(JSON_OBJECT_BEGIN)) {
         jsonValue = new JsonObject(__format, __indent, true, true);
         convertObject(dynamic_cast<JsonObject *>(jsonValue), v);
@@ -85,7 +85,5 @@ JsonValue *JsonConvert::convertJson() {
         __ptr++;
         convertArray(dynamic_cast<JsonArray *>(jsonValue), v);
     } else throw JsonException("Error: JSON document parsing failed");
-
-    __jsonValuePtr = std::shared_ptr<JsonValue>(jsonValue);
     return jsonValue;
 }
