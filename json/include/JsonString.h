@@ -21,7 +21,7 @@ namespace Json {
                 return "\"" + __str + "\"";
             } else {
                 std::string s = "\"";
-                for (int i = 0; i < __str.size(); i++) {
+                for (size_t i = 0; i < __str.size(); i++) {
                     char c = __str[i];
                     std::string tp;
                     if (is_escape(c, tp))

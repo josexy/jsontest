@@ -2,7 +2,7 @@
 #include "../include/JsonConvert.h"
 #include "../include/JsonException.h"
 
-void Json::JsonConvert::convertObject(JsonObject *jsonObject, const std::string &value){
+void Json::JsonConvert::convertObject(JsonObject *jsonObject, const std::string &value) {
     if (value[0] == JSON_OBJECT_BEGIN) {
         while (__ptr < __len) {
             std::string v = __lstJsonValue[__ptr];
@@ -47,7 +47,7 @@ void Json::JsonConvert::convertArray(JsonArray *jsonArray, const std::string &va
     if (value[0] == JSON_ARRAY_BEGIN) {
         while (__ptr < __len) {
             std::string v = __lstJsonValue[__ptr++];
-            if (v[0] == JSON_ARRAY_END) {break;}
+            if (v[0] == JSON_ARRAY_END) { break; }
             if (v[0] == '\"') {
                 __remove_quotation(v);
                 jsonArray->put(std::string(v));
@@ -70,20 +70,18 @@ void Json::JsonConvert::convertArray(JsonArray *jsonArray, const std::string &va
     }
 }
 
-Json::JsonValue *Json::JsonConvert::convertJson() {
-    if(jsonValue) return jsonValue;
+std::shared_ptr <Json::JsonValue> Json::JsonConvert::convertJson() {
+    if (jsonValuePtr) return jsonValuePtr;
     if (__lstJsonValue.empty()) return nullptr;
-    auto beginIter = __lstJsonValue.begin();
-    auto endIter = __lstJsonValue.end();
 
     std::string v = __lstJsonValue[0];
     if (v == _JSCS(JSON_OBJECT_BEGIN)) {
-        jsonValue = new JsonObject(__format, __indent, true, true);
-        convertObject(dynamic_cast<JsonObject *>(jsonValue), v);
+        jsonValuePtr = std::shared_ptr<JsonValue>(new JsonObject(__format, __indent, true, true));
+        convertObject(dynamic_cast<Json::JsonObject *>(jsonValuePtr.get()), v);
     } else if (v == _JSCS(JSON_ARRAY_BEGIN)) {
-        jsonValue = new JsonArray(__format, __indent);
+        jsonValuePtr = std::shared_ptr<JsonValue>(new JsonArray(__format, __indent));
         __ptr++;
-        convertArray(dynamic_cast<JsonArray *>(jsonValue), v);
-    } else throw JsonException("Error: JSON document parsing failed");
-    return jsonValue;
+        convertArray(dynamic_cast<Json::JsonArray *>(jsonValuePtr.get()), v);
+    } else throw JsonException("Error: JSON document parse failed");
+    return jsonValuePtr;
 }

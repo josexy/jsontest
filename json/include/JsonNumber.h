@@ -30,9 +30,9 @@ namespace Json {
     protected:
         using JsonValue::toList;
     private:
-        bool __flag;
         int __In;
         double __Dn;
+        bool __flag;
     };
 }
 #endif

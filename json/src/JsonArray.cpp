@@ -24,7 +24,7 @@ const Json::JsonArray::json_array_element_t &Json::JsonArray::get(int index) {
 }
 
 Json::JsonArray::json_array_citerator Json::JsonArray::find(JsonValue *jsonValue) {
-    for (int i = 0; i < __lstJsonArray.size(); i++)
+    for (size_t i = 0; i < __lstJsonArray.size(); i++)
         if (__lstJsonArray[i].get() == jsonValue)
             return __lstJsonArray.begin() + i;
     return __lstJsonArray.end();

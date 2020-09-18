@@ -21,7 +21,7 @@ namespace Json {
         JsonConvert &operator=(JsonConvert &&) = delete;
 
         explicit JsonConvert(const JsonParser &jsonParser, bool format = false, int indent = 4, bool escape = false)
-                : __format(format), __indent(indent), __ptr(0) {
+                : __format(format), __ptr(0), __indent(indent) {
             jsonParser.__escape = escape;
             if (!jsonParser.__parser) const_cast<JsonParser &>(jsonParser).parseJsonDocument();
             __lstJsonValue = jsonParser.jsonValue;
@@ -37,7 +37,7 @@ namespace Json {
         explicit JsonConvert(FILE *fp, bool format = false, int indent = 4, bool escape = false)
                 : JsonConvert(JsonParser(fp), format, indent, escape) {}
 
-        JsonValue *convertJson();
+        std::shared_ptr <JsonValue> convertJson();
 
     protected:
         void convertObject(JsonObject *jsonObject, const std::string &value);
@@ -51,15 +51,15 @@ namespace Json {
         }
 
         bool __isNumber(const std::string &number) {
-            for (int i = 0; i < number.size(); ++i)
+            for (size_t i = 0; i < number.size(); ++i)
                 if (!(JsonParser::is_number(number[i]) || number[i] == '.'))
                     return false;
             return true;
         }
 
     private:
-        std::vector<std::string> __lstJsonValue;
-        JsonValue *jsonValue= nullptr;
+        std::vector <std::string> __lstJsonValue;
+        std::shared_ptr <JsonValue> jsonValuePtr = nullptr;
         bool __format;
         int __ptr, __len, __indent;
     };

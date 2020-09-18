@@ -15,7 +15,7 @@ namespace Json {
 
         void escape_rs(std::string &s) const {
             std::string v, w;
-            for (int i = 0; i < s.size(); ++i)
+            for (size_t i = 0; i < s.size(); ++i)
                 if (s[i] == '\\') v += "\\";
                 else if (JsonString::is_escape(s[i], w)) v += w;
                 else v += s[i];

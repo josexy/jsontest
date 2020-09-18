@@ -18,7 +18,7 @@ bool Json::JsonObject::put(JsonString *jsonKey, JsonValue *jsonValue) {
 }
 
 Json::JsonObject::json_object_citerator Json::JsonObject::find(JsonString *jsonKey, JsonValue *jsonValue) {
-    for (int i = 0; i < __mpJsonObject.size(); i++)
+    for (size_t i = 0; i < __mpJsonObject.size(); i++)
         if (__mpJsonObject[i].key.get() == jsonKey || __mpJsonObject[i].value.get() == jsonValue)
             return __mpJsonObject.begin() + i;
     return __mpJsonObject.end();
@@ -54,7 +54,7 @@ const std::vector<std::string> &Json::JsonObject::toList() {
         __lstJsonText.push_back(iter->key->toString());
         __lstJsonText.push_back(_JSCS(JSON_OBJ_SEPARATE));
         auto x = iter->value->toList();
-        for (int i = 0; i < x.size(); ++i) __lstJsonText.push_back(x.at(i));
+        for (size_t i = 0; i < x.size(); ++i) __lstJsonText.push_back(x.at(i));
         __index++;
         if (__index < __size) __lstJsonText.push_back(_JSCS(JSON_SEPARATE));
     }
