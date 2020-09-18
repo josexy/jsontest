@@ -4,7 +4,7 @@ This is just a simple C++ JSON parser
 # sample
 ```cpp
 #include <iostream>
-#include "json/include/Json.h"
+#include "json/include/JsonDocument.h"
 
 using namespace Json;
 using namespace std;
@@ -40,24 +40,22 @@ int json_read() {
     ifstream ifs;
     ifs.open("test_array.json");
 //    ifs.open("test_object.json");
-    if(!ifs.is_open()) {
-        cout<<"Not open\n";
+    if (!ifs.is_open()) {
+        cout << "Not open\n";
         return -1;
     }
     try {
-        JsonConvert jsonConvert(ifs,true);
-        JsonValue *value=jsonConvert.convertJson();
-
+        JsonDocument doc(ifs);
         JsonArray *array = nullptr;
         JsonObject *object = nullptr;
 
-        if(value->type()==JsonValueType::Array)
-            array=dynamic_cast<JsonArray *>(value);
-        else if(value->type()==JsonValueType::Object)
-            object=dynamic_cast<JsonObject *>(value);
+        if (doc.isArray())
+            array = doc.array();
+        else if (doc.isObject())
+            object = doc.object();
 
         if (object) {
-            array=(JsonArray*)object->value("menu")->value("popup")->value("menuitem");
+            array = (JsonArray *) object->value("menu")->value("popup")->value("menuitem");
             for (auto &x:*array) {
                 if (x->type() == JsonValueType::Object) {
                     JsonObject *obj = (JsonObject *) x.get();
@@ -66,10 +64,10 @@ int json_read() {
                     }
                 }
             }
-        }else if(array){
-            cout<<array<<endl;
-            for (auto x=array->begin();x!=array->end();x++){
-                cout<<x->get()->value("email")->data().data1<<endl;
+        } else if (array) {
+            cout << array << endl;
+            for (auto x = array->begin(); x != array->end(); x++) {
+                cout << x->get()->value("email")->data().data1 << endl;
             }
         }
     } catch (JsonException &jsonException) {
@@ -79,15 +77,12 @@ int json_read() {
     return 0;
 }
 
+
 int main() {
     json_write();
-
-    cout<<endl;
-    
+    cout << endl;
     json_read();
-    
     return 0;
 }
-
 ```
 
