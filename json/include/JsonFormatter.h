@@ -6,7 +6,7 @@
 namespace Json {
     class JsonFormatter {
     public:
-        JsonFormatter(int indent = 4) : __indent(indent) {}
+        JsonFormatter(int indent = 4) : __json(""), __indent(indent) {}
 
     protected:
 
@@ -16,6 +16,7 @@ namespace Json {
         }
 
         void __formatIndentObject(const std::vector<std::string> &lstJsonText, std::string &json) {
+            __json = "";
             bool flag;
             int depth = 0, size = lstJsonText.size();
             for (int i = 0; i < size; ++i) {
@@ -59,8 +60,8 @@ namespace Json {
         void __putIndentJson(std::string &json) { for (int i = 0; i < __indent; ++i) __appendJson(json, " "); }
 
     private:
-        int __indent;
         std::string __json;
+        int __indent;
         char __LF = '\n';
     };
 }
