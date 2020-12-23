@@ -10,7 +10,7 @@
 #include <memory>
 
 namespace Json {
-    class JsonObject : public JsonValue, private JsonFormatter {
+    class   JsonObject : public JsonValue, private JsonFormatter {
     public:
         struct json_object_element_t {
             std::shared_ptr<JsonString> key;
@@ -90,7 +90,7 @@ namespace Json {
         // get current JsonValue from JsonObject by order index
         const json_object_element_t &get(int index);
 
-        JsonValue *value(const std::string &jsonKey);
+        JsonValue *value(const std::string &jsonKey) override;
 
         JsonValue *value(int) override { return nullptr; }
 

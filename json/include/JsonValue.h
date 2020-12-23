@@ -63,7 +63,6 @@ namespace Json {
             __vcsp.push_back(toString());
             return __vcsp;
         }
-
         friend std::ostream &operator<<(std::ostream &_out, JsonValue *jsonValue) {
             if (jsonValue) _out << jsonValue->toString();
             return _out;
