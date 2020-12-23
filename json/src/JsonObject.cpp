@@ -42,7 +42,10 @@ const Json::JsonObject::json_object_element_t &Json::JsonObject::get(int index) 
 }
 
 Json::JsonValue *Json::JsonObject::value(const std::string &jsonKey) {
-    for (auto &&p:__mpJsonObject) if (p.key->data().data1 == jsonKey)return p.value.get();
+    for (auto &&p:__mpJsonObject) {
+        if (p.key->data().data1 == jsonKey)
+            return p.value.get();
+    }
     throw JsonException("Error: Not found JSON Object Key: \"" + jsonKey + "\"!");
 }
 
