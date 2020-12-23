@@ -34,14 +34,15 @@ int json_write() {
 int json_read() {
     string jsonText = R""({"menu":{"id":"file","value":null,"popup":{"menuitem":[{"value":"New","onclick":"CreateNewDoc()"},{"value":"Open","onclick":"OpenDoc()"},{"value":"Close","onclick":"CloseDoc()"}]}}})"";
     ifstream ifs;
-    ifs.open("test_array.json");
-//    ifs.open("test_object.json");
+//    ifs.open("test_array.json");
+    ifs.open("test_object.json");
     if (!ifs.is_open()) {
         cout << "Not open\n";
         return -1;
     }
     try {
-        JsonDocument doc(ifs);
+        JsonDocument doc(ifs,true);
+
         JsonArray *array = nullptr;
         JsonObject *object = nullptr;
 
@@ -49,8 +50,9 @@ int json_read() {
             array = doc.array();
         else if (doc.isObject())
             object = doc.object();
-
         if (object) {
+//            cout << object << endl;
+            /*
             array = (JsonArray *) object->value("menu")->value("popup")->value("menuitem");
             for (auto &x:*array) {
                 if (x->type() == JsonValueType::Object) {
@@ -60,6 +62,16 @@ int json_read() {
                     }
                 }
             }
+            */
+            object->value("menu")->value("name")->setData(Data("tony"));
+            object->value("menu")->value("age")->setData(Data("66"));
+            cout << object <<endl;
+            object->value("menu")->value("name")->setData(Data("mike"));
+            object->value("menu")->value("age")->setData(Data("14"));
+            cout <<object <<endl;
+//            auto ls=object->value("menu")->toList();
+//            for(auto && s:ls)
+//                cout<<s<<endl;
         } else if (array) {
             cout << array << endl;
             for (auto x = array->begin(); x != array->end(); x++) {
